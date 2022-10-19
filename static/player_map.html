@@ -1,0 +1,47 @@
+<head>
+    <title>Player Map - D&D Map</title>
+    <link rel="stylesheet" href="styles.css">
+    <script type="application/javascript" src="https://unpkg.com/babel-standalone@6.26.0/babel.js"></script>
+    <!-- <script crossorigin src="https://unpkg.com/react@17/umd/react.production.min.js"></script> -->
+    <script crossorigin src="https://unpkg.com/react@17/umd/react.development.js"></script>
+    <!-- <script crossorigin src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script> -->
+    <script crossorigin src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+</head>
+<body>
+    
+    <div id="player-map"></div>
+    <script type="text/babel">
+        const playerMapEl = document.getElementById('player-map');
+
+        const PlayerMap = () => {
+            const [imgSrc, setImgSrc] = React.useState('');
+
+            function loadMap() {
+                var req = new XMLHttpRequest();
+                req.overrideMimeType("application/json");
+                req.open('GET', '/loadMap', true);
+                req.onload  = function() {
+                    let jsonResponse = JSON.parse(req.responseText);
+                    if (imgSrc != jsonResponse.mapImage) {
+                        console.log(jsonResponse.mapImage);
+                        setImgSrc(jsonResponse.mapImage);
+                    }
+                };
+                req.send(null);
+            }
+
+            setInterval(loadMap, 1000);
+            return (
+                <div>
+                    <div id="map-header">
+                        <h1>Player Map</h1>
+                    </div>
+                    <div id="map-view">
+                        <img src={imgSrc} />
+                    </div>
+                </div>
+            )
+        }
+        ReactDOM.render(<PlayerMap/>, playerMapEl);
+    </script>
+</body>

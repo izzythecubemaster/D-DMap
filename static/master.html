@@ -1,0 +1,166 @@
+<head>
+    <title>Master Controls - D&D Map</title>
+    <link rel="stylesheet" href="styles.css">
+    <script type="application/javascript" src="https://unpkg.com/babel-standalone@6.26.0/babel.js"></script>
+    <!-- <script crossorigin src="https://unpkg.com/react@17/umd/react.production.min.js"></script> -->
+    <script crossorigin src="https://unpkg.com/react@17/umd/react.development.js"></script>
+    <!-- <script crossorigin src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script> -->
+    <script crossorigin src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+</head>
+<body>
+    <div id="master-controls"></div>
+    <script type="text/babel">
+        const masterControlsEl = document.getElementById('master-controls');
+
+        const convertBase64 = (file) => {
+            return new Promise((resolve, reject) => {
+                const fileReader = new FileReader();
+                fileReader.readAsDataURL(file);
+
+                fileReader.onload = () => {
+                    resolve(fileReader.result);
+                };
+
+                fileReader.onerror = (error) => {
+                    reject(error);
+                };
+            });
+        };
+
+        async function uploadURL(URL) {
+            let formData = new FormData();
+            formData.append('URL', URL);
+            await fetch('/uploadURL', {
+                method: 'POST',
+                body: formData
+            });
+        }
+
+        async function uploadFile(file) {
+            const base64Img = await convertBase64(file);
+            let formData = new FormData();
+            formData.append('file', base64Img);
+            await fetch('/uploadFile', {
+                method: 'POST',
+                body: formData
+            });
+        }
+
+        class MasterControls extends React.Component {
+            constructor(props) {
+                super(props);
+                this.state = {
+                    imageSrc: ''
+                }
+                this.loadMap = this.loadMap.bind(this);
+                this.loadMap();
+            }
+
+            _handleKeyDown = (event) => {
+                switch(event.keyCode) {
+                    case 37:
+                        console.log("Left");
+                        break;
+                    case 38:
+                        console.log("Up");
+                        break;
+                    case 39:
+                        console.log("Right");
+                        break;
+                    case 40:
+                        console.log("Down");
+                        break;
+                    case 107:
+                        console.log("Zoom in 1");
+                        break;
+                    case 109:
+                        console.log("Zoom out 1");
+                        break;
+                    case 187:
+                        console.log("Zoom in 2");
+                        break;
+                    case 189:
+                        console.log("Zoom out 2");
+                        break;
+                    default:
+                        //Don't do nothing
+                }
+                //console.log(`Key: ${event.key} with keycode ${event.keyCode} has been pressed`);
+            }
+
+            componentDidMount() {
+                document.addEventListener("keydown", this._handleKeyDown);
+            }
+
+            componentWillUnmount() {
+                document.removeEventListener("keydown", this._handleKeyDown);
+            }
+
+            loadMap() {
+                var req = new XMLHttpRequest();
+                req.overrideMimeType("application/json");
+                req.open('GET', '/loadMap', true);
+                req.onload  = function() {
+                    let jsonResponse = JSON.parse(req.responseText);
+                    this.setState({
+                        imageSrc: jsonResponse.mapImage
+                    });
+                }.bind(this);
+                req.send(null);
+            }
+
+            handleURLChange(event) {
+                let imageURL = event.target.value;
+                if (
+                    (
+                        imageURL.startsWith('http://') || imageURL.startsWith('https://')
+                    ) && (
+                        imageURL.endsWith('.png') ||
+                        imageURL.endsWith('.jpg') ||
+                        imageURL.endsWith('.jpeg') ||
+                        imageURL.endsWith('.webp')
+                    )
+                ) {
+                    uploadURL(imageURL);
+                    this.setState({
+                        imageSrc: imageURL
+                    })
+                }
+            }
+
+            handleImageFile(event) {
+                var file = event.target.files[0];
+                uploadFile(file);
+                this.setState({
+                    imageSrc: URL.createObjectURL(file)
+                })
+            }
+
+            handleAnswerChange(event){
+                if(event.key === 'y'){
+                        alert('The sky is your starting point!')
+                }
+                    else if (event.key === 'n') {
+                        alert('The sky is your limit👀')
+                }
+            }
+            
+            render() {
+                return (
+                    <div>
+                        <div id="map-header">
+                            <label htmlFor="mapurl">Paste link to map: </label>
+                            <input type="text" id="mapurl" name="mapurl" onChange={(e) => this.handleURLChange(e)}/> or 
+                            <label htmlFor="myfile"> choose a map file: </label>
+                            <input type="file" id="mapfile" name="mapfile" accept="image/*" onChange={(e) => this.handleImageFile(e)}></input><br/>
+                        </div>
+                        <div id="map-view" onKeyPress={this.handleAnswerChange}>
+                            <img src={this.state.imageSrc} />
+                        </div>
+                    </div>
+                );
+            }
+        }
+        ReactDOM.render(<MasterControls/>, masterControlsEl);
+    </script>
+</body>
