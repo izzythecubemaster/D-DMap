@@ -46,14 +46,42 @@
             });
         }
 
+        async function uploadScaleFactor(currentScale) {
+            let formData = new FormData();
+            formData.append('scaleFactor', currentScale);
+            await fetch('/uploadScaleFactor', {
+                method: 'POST',
+                body: formData
+            });
+        }
+
         class MasterControls extends React.Component {
             constructor(props) {
                 super(props);
                 this.state = {
-                    imageSrc: ''
+                    imageSrc: '',
+                    scaleFactor: 1.0
                 }
                 this.loadMap = this.loadMap.bind(this);
                 this.loadMap();
+            }
+
+            increaseScaleFactor() {
+                let currentScale = parseFloat(this.state.scaleFactor).toFixed(1);
+                let newScaleFactor = parseFloat(currentScale) + parseFloat(0.1);
+                uploadScaleFactor(newScaleFactor);
+                this.setState({
+                    scaleFactor: newScaleFactor
+                });
+            }
+
+            decreaseScaleFactor() {
+                let currentScale = parseFloat(this.state.scaleFactor).toFixed(1);
+                let newScaleFactor = parseFloat(currentScale) - parseFloat(0.1);
+                uploadScaleFactor(newScaleFactor);
+                this.setState({
+                    scaleFactor: newScaleFactor
+                });
             }
 
             _handleKeyDown = (event) => {
@@ -71,16 +99,16 @@
                         console.log("Down");
                         break;
                     case 107:
-                        console.log("Zoom in 1");
+                        this.increaseScaleFactor();
                         break;
                     case 109:
-                        console.log("Zoom out 1");
+                        this.decreaseScaleFactor();
                         break;
                     case 187:
-                        console.log("Zoom in 2");
+                        this.increaseScaleFactor();
                         break;
                     case 189:
-                        console.log("Zoom out 2");
+                        this.decreaseScaleFactor();
                         break;
                     default:
                         //Don't do nothing
@@ -122,8 +150,10 @@
                     )
                 ) {
                     uploadURL(imageURL);
+                    uploadScaleFactor(1.0);
                     this.setState({
-                        imageSrc: imageURL
+                        imageSrc: imageURL,
+                        scaleFactor: 1.0
                     })
                 }
             }
@@ -131,18 +161,11 @@
             handleImageFile(event) {
                 var file = event.target.files[0];
                 uploadFile(file);
+                uploadScaleFactor(1.0);
                 this.setState({
-                    imageSrc: URL.createObjectURL(file)
+                    imageSrc: URL.createObjectURL(file),
+                    scaleFactor: 1.0
                 })
-            }
-
-            handleAnswerChange(event){
-                if(event.key === 'y'){
-                        alert('The sky is your starting point!')
-                }
-                    else if (event.key === 'n') {
-                        alert('The sky is your limit👀')
-                }
             }
             
             render() {
@@ -155,7 +178,10 @@
                             <input type="file" id="mapfile" name="mapfile" accept="image/*" onChange={(e) => this.handleImageFile(e)}></input><br/>
                         </div>
                         <div id="map-view" onKeyPress={this.handleAnswerChange}>
-                            <img src={this.state.imageSrc} />
+                            <img 
+                                style={{transform: `scale(${this.state.scaleFactor})`}}
+                                src={this.state.imageSrc}
+                            />
                         </div>
                     </div>
                 );

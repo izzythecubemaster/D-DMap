@@ -38,22 +38,28 @@ def player_index():
 def load_map():
     return Response(load_map_file(), mimetype='application/json', status=200)
 
+@map_app.route('/uploadScaleFactor', methods=['POST'])
+def parse_scale_factor():
+    current_map_data = json.loads(load_map_file())
+    scale_factor = request.form['scaleFactor']
+    current_map_data['scaleFactor'] = scale_factor
+    update_map_file(current_map_data)
+    return Response('OK', mimetype='text/html', status=200)
+
 @map_app.route('/uploadURL', methods=['POST'])
 def parse_url():
+    current_map_data = json.loads(load_map_file())
     image_URL = request.form['URL']
-    current_player_map = {
-        "mapImage": image_URL,
-    }
-    update_map_file(current_player_map)
+    current_map_data['mapImage'] = image_URL
+    update_map_file(current_map_data)
     return Response('OK', mimetype='text/html', status=200)
 
 @map_app.route('/uploadFile', methods=['POST'])
 def parse_image():
+    current_map_data = json.loads(load_map_file())
     image_file = request.form['file']
-    current_player_map = {
-        "mapImage": image_file,
-    }
-    update_map_file(current_player_map)
+    current_map_data['mapImage'] = image_file
+    update_map_file(current_map_data)
     return Response('OK', mimetype='text/html', status=200)
 
 @map_app.route('/')

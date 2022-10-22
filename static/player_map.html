@@ -15,6 +15,7 @@
 
         const PlayerMap = () => {
             const [imgSrc, setImgSrc] = React.useState('');
+            const [mapScale, setMapScale] = React.useState(1.0);
 
             function loadMap() {
                 var req = new XMLHttpRequest();
@@ -23,7 +24,7 @@
                 req.onload  = function() {
                     let jsonResponse = JSON.parse(req.responseText);
                     if (imgSrc != jsonResponse.mapImage) {
-                        console.log(jsonResponse.mapImage);
+                        setMapScale(jsonResponse.scaleFactor)
                         setImgSrc(jsonResponse.mapImage);
                     }
                 };
@@ -34,10 +35,13 @@
             return (
                 <div>
                     <div id="map-header">
-                        <h1>Player Map</h1>
+                        <h1>Player Map - Zoom {parseFloat(mapScale).toFixed(1)}x</h1>
                     </div>
                     <div id="map-view">
-                        <img src={imgSrc} />
+                        <img 
+                            style={{transform: `scale(${mapScale})`}}
+                            src={imgSrc}
+                        />
                     </div>
                 </div>
             )
