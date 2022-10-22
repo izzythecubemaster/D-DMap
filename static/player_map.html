@@ -16,6 +16,8 @@
         const PlayerMap = () => {
             const [imgSrc, setImgSrc] = React.useState('');
             const [mapScale, setMapScale] = React.useState(1.0);
+            const [xOffset, setXOffset] = React.useState(0);
+            const [yOffset, setYOffset] = React.useState(0);
 
             function loadMap() {
                 var req = new XMLHttpRequest();
@@ -23,15 +25,23 @@
                 req.open('GET', '/loadMap', true);
                 req.onload  = function() {
                     let jsonResponse = JSON.parse(req.responseText);
+                    setMapScale(jsonResponse.scaleFactor);
+                    setXOffset(jsonResponse.xOffset);
+                    setYOffset(jsonResponse.yOffset);
                     if (imgSrc != jsonResponse.mapImage) {
-                        setMapScale(jsonResponse.scaleFactor)
                         setImgSrc(jsonResponse.mapImage);
                     }
                 };
                 req.send(null);
             }
 
-            setInterval(loadMap, 1000);
+            React.useEffect(() => {
+                const interval = setInterval(() => {
+                    loadMap();
+                }, 1000);
+                return () => clearInterval(interval);
+            }, []);
+
             return (
                 <div>
                     <div id="map-header">
@@ -39,8 +49,10 @@
                     </div>
                     <div id="map-view">
                         <img 
-                            style={{transform: `scale(${mapScale})`}}
-                            src={imgSrc}
+                        style={{
+                            transform: `scale(${mapScale}) translate(${xOffset}px, ${yOffset}px)`
+                        }}
+                        src={imgSrc}
                         />
                     </div>
                 </div>

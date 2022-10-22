@@ -46,6 +46,22 @@ def parse_scale_factor():
     update_map_file(current_map_data)
     return Response('OK', mimetype='text/html', status=200)
 
+@map_app.route('/uploadXOffset', methods=['POST'])
+def parse_x_offset():
+    current_map_data = json.loads(load_map_file())
+    x_offset = request.form['xOffset']
+    current_map_data['xOffset'] = x_offset
+    update_map_file(current_map_data)
+    return Response('OK', mimetype='text/html', status=200)
+
+@map_app.route('/uploadYOffset', methods=['POST'])
+def parse_y_offset():
+    current_map_data = json.loads(load_map_file())
+    y_offset = request.form['yOffset']
+    current_map_data['yOffset'] = y_offset
+    update_map_file(current_map_data)
+    return Response('OK', mimetype='text/html', status=200)
+
 @map_app.route('/uploadURL', methods=['POST'])
 def parse_url():
     current_map_data = json.loads(load_map_file())

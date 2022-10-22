@@ -27,3 +27,7 @@ p {
     height: calc(100vh - 42px - 4px);
     border: 2px solid #a00000
 }
+
+#map-view img {
+    object-fit: cover;
+}

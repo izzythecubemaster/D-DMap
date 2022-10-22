@@ -55,15 +55,46 @@
             });
         }
 
+        async function uploadXOffset(currentXOffset) {
+            let formData = new FormData();
+            formData.append('xOffset', currentXOffset);
+            await fetch('/uploadXOffset', {
+                method: 'POST',
+                body: formData
+            });
+        }
+
+        async function uploadYOffset(currentYOffset) {
+            let formData = new FormData();
+            formData.append('yOffset', currentYOffset);
+            await fetch('/uploadYOffset', {
+                method: 'POST',
+                body: formData
+            });
+        }
+
         class MasterControls extends React.Component {
             constructor(props) {
                 super(props);
                 this.state = {
                     imageSrc: '',
-                    scaleFactor: 1.0
+                    scaleFactor: 1.0,
+                    xOffset: 0,
+                    yOffset: 0
                 }
                 this.loadMap = this.loadMap.bind(this);
                 this.loadMap();
+            }
+
+            resetZoom() {
+                uploadScaleFactor(1.0);
+                uploadXOffset(0);
+                uploadYOffset(0);
+                this.setState({
+                    scaleFactor: 1.0,
+                    xOffset: 0,
+                    yOffset: 0
+                })
             }
 
             increaseScaleFactor() {
@@ -84,19 +115,61 @@
                 });
             }
 
+            increaseXOffset() {
+                let currentXOffset = parseFloat(this.state.xOffset).toFixed();
+                let newXOffset = parseFloat(currentXOffset) + parseFloat(10);
+                uploadXOffset(newXOffset);
+                this.setState({
+                    xOffset: newXOffset
+                })
+            }
+
+            decreaseXOffset() {
+                let currentXOffset = parseFloat(this.state.xOffset).toFixed();
+                let newXOffset = parseFloat(currentXOffset) - parseFloat(10);
+                uploadXOffset(newXOffset);
+                this.setState({
+                    xOffset: newXOffset
+                })
+            }
+
+            increaseYOffset() {
+                let currentYOffset = parseFloat(this.state.yOffset).toFixed();
+                let newYOffset = parseFloat(currentYOffset) + parseFloat(10);
+                uploadYOffset(newYOffset);
+                this.setState({
+                    yOffset: newYOffset
+                })
+            }
+
+            decreaseYOffset() {
+                let currentYOffset = parseFloat(this.state.yOffset).toFixed();
+                let newYOffset = parseFloat(currentYOffset) - parseFloat(10);
+                uploadYOffset(newYOffset);
+                this.setState({
+                    yOffset: newYOffset
+                })
+            }
+
             _handleKeyDown = (event) => {
                 switch(event.keyCode) {
                     case 37:
-                        console.log("Left");
+                        this.decreaseXOffset();
                         break;
                     case 38:
-                        console.log("Up");
+                        this.decreaseYOffset();
                         break;
                     case 39:
-                        console.log("Right");
+                        this.increaseXOffset();
                         break;
                     case 40:
-                        console.log("Down");
+                        this.increaseYOffset();
+                        break;
+                    case 48:
+                        this.resetZoom();
+                        break;
+                    case 96:
+                        this.resetZoom();
                         break;
                     case 107:
                         this.increaseScaleFactor();
@@ -131,7 +204,10 @@
                 req.onload  = function() {
                     let jsonResponse = JSON.parse(req.responseText);
                     this.setState({
-                        imageSrc: jsonResponse.mapImage
+                        imageSrc: jsonResponse.mapImage,
+                        scaleFactor: jsonResponse.scaleFactor,
+                        xOffset: 0,
+                        yOffset: 0
                     });
                 }.bind(this);
                 req.send(null);
@@ -179,7 +255,9 @@
                         </div>
                         <div id="map-view" onKeyPress={this.handleAnswerChange}>
                             <img 
-                                style={{transform: `scale(${this.state.scaleFactor})`}}
+                                style={{
+                                    transform: `scale(${this.state.scaleFactor}) translate(${this.state.xOffset}px, ${this.state.yOffset}px)`
+                                }}
                                 src={this.state.imageSrc}
                             />
                         </div>
