@@ -73,6 +73,17 @@
             });
         }
 
+        async function uploadReset() {
+            let formData = new FormData();
+            formData.append('scaleFactor', 1.0);
+            formData.append('xOffset', 0);
+            formData.append('yOffset', 0);
+            await fetch('/uploadXYScale', {
+                method: 'POST',
+                body: formData
+            });
+        }
+
         class MasterControls extends React.Component {
             constructor(props) {
                 super(props);
@@ -87,9 +98,7 @@
             }
 
             resetZoom() {
-                uploadScaleFactor(1.0);
-                uploadXOffset(0);
-                uploadYOffset(0);
+                uploadReset();
                 this.setState({
                     scaleFactor: 1.0,
                     xOffset: 0,
