@@ -177,7 +177,6 @@
             formData.append('xOffset', newData.xOffset);
             formData.append('yOffset', newData.yOffset);
             formData.append('canvas', newData.canvas.toDataURL());
-            console.log(formData);
             await fetch('/uploadData', {
                 method: 'POST',
                 body: formData
