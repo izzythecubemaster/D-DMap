@@ -90,6 +90,14 @@ def parse_image():
     update_map_file(current_map_data)
     return Response('OK', mimetype='text/html', status=200)
 
+@map_app.route('/uploadCanvas', methods=['POST'])
+def parse_canvas():
+    current_map_data = json.loads(load_map_file())
+    image_file = request.form['canvas']
+    current_map_data['canvas'] = image_file
+    update_map_file(current_map_data)
+    return Response('OK', mimetype='text/html', status=200)
+
 @map_app.route('/')
 def index():
     player_map_file = open('static/player_map.html')

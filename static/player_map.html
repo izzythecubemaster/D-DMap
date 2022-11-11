@@ -14,6 +14,7 @@
         const playerMapEl = document.getElementById('player-map');
 
         const PlayerMap = () => {
+            const [canvasSrc, setCanvasSrc] = React.useState('');
             const [imgSrc, setImgSrc] = React.useState('');
             const [mapScale, setMapScale] = React.useState(1.0);
             const [xOffset, setXOffset] = React.useState(0);
@@ -25,6 +26,7 @@
                 req.open('GET', '/loadMap', true);
                 req.onload  = function() {
                     let jsonResponse = JSON.parse(req.responseText);
+                    setCanvasSrc(jsonResponse.canvas);
                     setMapScale(jsonResponse.scaleFactor);
                     setXOffset(jsonResponse.xOffset);
                     setYOffset(jsonResponse.yOffset);
@@ -48,7 +50,9 @@
                         <h1>Player Map - Zoom {parseFloat(mapScale).toFixed(1)}x</h1>
                     </div>
                     <div id="map-view">
-                        <img 
+                        <img id="player-canvas" src={canvasSrc}/>
+                        <img
+                        id="map-image"
                         style={{
                             transform: `scale(${mapScale}) translate(${xOffset}px, ${yOffset}px)`
                         }}

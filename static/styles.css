@@ -22,12 +22,38 @@ p {
     margin-block-end: 0;
 }
 
+#drawing-overlay {
+    opacity: 1;
+    width: 100vw;
+    height: calc(100vh - 42px - 4px);
+    top: calc(42px + 2px);
+    left: 2px;
+    position: fixed;
+    z-index: 2;
+}
+
+#drawing-board {
+    opacity: 0.5;
+    width: 100vw;
+    height: calc(100vh - 42px - 4px);
+    top: calc(42px + 2px);
+    left: 2px;
+    position: fixed;
+    z-index: 1;
+}
+
+#player-canvas {
+    z-index: 2;
+    position: fixed;
+}
+
 #map-view {
     overflow: hidden;
     height: calc(100vh - 42px - 4px);
     border: 2px solid #a00000
 }
 
-#map-view img {
+#map-img {
+    z-index: 0;
     object-fit: cover;
 }

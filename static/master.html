@@ -8,6 +8,130 @@
     <script crossorigin src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
 </head>
 <body>
+    <canvas id="drawing-overlay"></canvas>
+    <canvas id="drawing-board"></canvas>
+    <script>
+        function drawEmptyArc(context, x, y, radius) {
+            context.fillStyle = "#a00000";
+            context.lineWidth = 2;
+            context.beginPath();
+            context.arc(x, y, radius + 2, 0, 2 * Math.PI);
+            context.stroke();
+        }
+
+        function fillArc(context, x, y, radius) {
+            context.fillStyle = "#000000";
+            context.beginPath();
+            context.arc(x, y, radius + 2, 0, 2 * Math.PI);
+            context.fill();
+        }
+
+        function clearArc(context, x, y, radius) {
+            context.save();
+            context.globalCompositeOperation = 'destination-out';
+            context.beginPath();
+            context.arc(x, y, radius, 0, 2 * Math.PI, false);
+            context.fill();
+            context.restore();
+        }
+
+        async function uploadCanvas(canvas) {
+            const dataURL = canvas.toDataURL()
+            let formData = new FormData();
+            formData.append('canvas', dataURL);
+            await fetch('/uploadCanvas', {
+                method: 'POST',
+                body: formData
+            });
+        }
+
+        const canvasOverlay = document.getElementById('drawing-overlay');
+        const overlayContext = canvasOverlay.getContext('2d');
+        const canvas = document.getElementById('drawing-board');
+        const ctx = canvas.getContext('2d');
+
+        const canvasOffsetX = canvas.offsetLeft;
+        const canvasOffsetY = canvas.offsetTop;
+
+        canvas.width = window.innerWidth - canvasOffsetX;
+        canvas.height = window.innerHeight - canvasOffsetY;
+
+        canvasOverlay.width = window.innerWidth - canvasOffsetX;
+        canvasOverlay.height = window.innerHeight - canvasOffsetY;
+
+        let isPainting = false;
+        let lineWidth = 128;
+        let startX;
+        let startY;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.beginPath();
+        ctx.rect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "black";
+        ctx.fill();
+
+        const draw = (e) => {
+            overlayContext.clearRect(0, 0, canvasOverlay.width, canvasOverlay.height);
+            overlayContext.fillStyle = "red"
+            
+            if(!isPainting) {
+                overlayContext.fillStyle = "black"
+                drawEmptyArc(overlayContext, e.clientX - canvasOffsetX, e.clientY, lineWidth);
+                return;
+            }
+            drawEmptyArc(overlayContext, e.clientX - canvasOffsetX, e.clientY, lineWidth);
+            
+
+            // ctx.lineWidth = lineWidth;
+            // ctx.lineCap = 'round';
+
+            // ctx.lineTo(e.clientX - canvasOffsetX, e.clientY);
+            // ctx.stroke();
+
+            // ctx.beginPath();
+            // ctx.arc(e.clientX - canvasOffsetX, e.clientY, lineWidth, 0, 2 * Math.PI);
+            // ctx.clip()
+            // ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        canvasOverlay.addEventListener('mousedown', (e) => {
+            if (e.which == 1) {
+                isPainting = true;
+                startX = e.clientX;
+                startY = e.clientY;
+                clearArc(ctx, e.clientX - canvasOffsetX, e.clientY, lineWidth);
+            }
+            if (e.which == 3) {
+                isPainting = true;
+                startX = e.clientX;
+                startY = e.clientY;
+                fillArc(ctx, e.clientX - canvasOffsetX, e.clientY, lineWidth);
+                
+                // ctx.beginPath();
+                // ctx.rect(e.clientX - lineWidth, e.clientY - lineWidth, lineWidth*2 , lineWidth*2,)
+                // ctx.fillStyle = "black";
+                // ctx.fill();
+
+                // ctx.clearRect(0, 0, canvas.width, canvas.height);
+                // ctx.beginPath();
+                // ctx.rect(0, 0, canvas.width, canvas.height);
+                // ctx.fillStyle = "black";
+                // ctx.fill();
+            }
+        });
+
+        canvasOverlay.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        }, false);
+
+        canvasOverlay.addEventListener('mouseup', e => {
+            isPainting = false;
+            uploadCanvas(canvas);
+            // ctx.stroke();
+        });
+
+        canvasOverlay.addEventListener('mousemove', draw);
+    </script>
     <div id="master-controls"></div>
     <script type="text/babel">
         const masterControlsEl = document.getElementById('master-controls');
@@ -87,11 +211,13 @@
         class MasterControls extends React.Component {
             constructor(props) {
                 super(props);
+
                 this.state = {
                     imageSrc: '',
                     scaleFactor: 1.0,
                     xOffset: 0,
-                    yOffset: 0
+                    yOffset: 0,
+                    canvas: document.getElementById('drawing-board')
                 }
                 this.loadMap = this.loadMap.bind(this);
                 this.loadMap();
@@ -160,6 +286,15 @@
                 })
             }
 
+            clearCanvas() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.beginPath();
+                ctx.rect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = "black";
+                ctx.fill();
+                return canvas;
+            }
+
             _handleKeyDown = (event) => {
                 switch(event.keyCode) {
                     case 37:
@@ -175,9 +310,11 @@
                         this.increaseYOffset();
                         break;
                     case 48:
+                        uploadCanvas(this.clearCanvas());
                         this.resetZoom();
                         break;
                     case 96:
+                        uploadCanvas(this.clearCanvas());
                         this.resetZoom();
                         break;
                     case 107:
@@ -252,7 +389,7 @@
                     scaleFactor: 1.0
                 })
             }
-            
+
             render() {
                 return (
                     <div>
