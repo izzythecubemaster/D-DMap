@@ -38,65 +38,16 @@ def player_index():
 def load_map():
     return Response(load_map_file(), mimetype='application/json', status=200)
 
-@map_app.route('/uploadScaleFactor', methods=['POST'])
-def parse_scale_factor():
+@map_app.route('/uploadData', methods=['POST'])
+def parse_data():
     current_map_data = json.loads(load_map_file())
-    scale_factor = request.form['scaleFactor']
-    current_map_data['scaleFactor'] = scale_factor
-    update_map_file(current_map_data)
-    return Response('OK', mimetype='text/html', status=200)
-
-@map_app.route('/uploadXOffset', methods=['POST'])
-def parse_x_offset():
-    current_map_data = json.loads(load_map_file())
-    x_offset = request.form['xOffset']
-    current_map_data['xOffset'] = x_offset
-    update_map_file(current_map_data)
-    return Response('OK', mimetype='text/html', status=200)
-
-@map_app.route('/uploadYOffset', methods=['POST'])
-def parse_y_offset():
-    current_map_data = json.loads(load_map_file())
-    y_offset = request.form['yOffset']
-    current_map_data['yOffset'] = y_offset
-    update_map_file(current_map_data)
-    return Response('OK', mimetype='text/html', status=200)
-
-@map_app.route('/uploadXYScale', methods=['POST'])
-def parse_x_y_scale():
-    current_map_data = json.loads(load_map_file())
-    scale_factor = request.form['scaleFactor']
-    x_offset = request.form['xOffset']
-    y_offset = request.form['yOffset']
-    current_map_data['scaleFactor'] = scale_factor
-    current_map_data['yOffset'] = y_offset
-    current_map_data['xOffset'] = x_offset
-    update_map_file(current_map_data)
-    return Response('OK', mimetype='text/html', status=200)
-
-@map_app.route('/uploadURL', methods=['POST'])
-def parse_url():
-    current_map_data = json.loads(load_map_file())
-    image_URL = request.form['URL']
-    current_map_data['mapImage'] = image_URL
-    update_map_file(current_map_data)
-    return Response('OK', mimetype='text/html', status=200)
-
-@map_app.route('/uploadFile', methods=['POST'])
-def parse_image():
-    current_map_data = json.loads(load_map_file())
-    image_file = request.form['file']
-    current_map_data['mapImage'] = image_file
-    update_map_file(current_map_data)
-    return Response('OK', mimetype='text/html', status=200)
-
-@map_app.route('/uploadCanvas', methods=['POST'])
-def parse_canvas():
-    current_map_data = json.loads(load_map_file())
-    image_file = request.form['canvas']
-    current_map_data['canvas'] = image_file
-    update_map_file(current_map_data)
-    return Response('OK', mimetype='text/html', status=200)
+    upload_map_data = request.form
+    # Replace values of old keys data with new
+    form_json = request.form.to_dict(flat=True)
+    if (form_json != current_map_data):
+        current_map_data.update(form_json)
+        update_map_file(current_map_data)
+    return Response("OK", mimetype='text/html', status=200)
 
 @map_app.route('/')
 def index():
@@ -148,7 +99,7 @@ def http_error(e):
     return Response(r, mimetype='image/jpeg', status=500)
 
 if __name__ == '__main__':
+    # webbrowser.open_new(master_url)
+    # webbrowser.open_new(player_url)
     # If you want to run with specific info use host={ip}, port=80
-    webbrowser.open_new(master_url)
-    webbrowser.open_new(player_url)
     map_app.run(host='127.0.0.1', port=420)

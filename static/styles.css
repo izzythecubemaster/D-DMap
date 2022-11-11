@@ -45,6 +45,8 @@ p {
 #player-canvas {
     z-index: 2;
     position: fixed;
+    top: calc(42px + 2px);
+    left: 2px;
 }
 
 #map-view {
