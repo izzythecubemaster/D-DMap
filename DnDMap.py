@@ -99,7 +99,7 @@ def http_error(e):
     return Response(r, mimetype='image/jpeg', status=500)
 
 if __name__ == '__main__':
-    # webbrowser.open_new(master_url)
-    # webbrowser.open_new(player_url)
+    webbrowser.open_new(master_url)
+    webbrowser.open_new(player_url)
     # If you want to run with specific info use host={ip}, port=80
     map_app.run(host='127.0.0.1', port=420)
