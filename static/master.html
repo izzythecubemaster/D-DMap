@@ -12,7 +12,6 @@
     <canvas id="drawing-board"></canvas>
     <script>
         function drawEmptyArc(context, x, y, radius) {
-            context.fillStyle = "#a00000";
             context.lineWidth = 2;
             context.beginPath();
             context.arc(x, y, radius + 2, 0, 2 * Math.PI);
@@ -20,7 +19,6 @@
         }
 
         function fillArc(context, x, y, radius) {
-            context.fillStyle = "#000000";
             context.beginPath();
             context.arc(x, y, radius + 2, 0, 2 * Math.PI);
             context.fill();
@@ -60,6 +58,7 @@
         canvasOverlay.height = window.innerHeight - canvasOffsetY;
 
         let isPainting = false;
+        let isErasing = false;
         let lineWidth = 128;
         let startX;
         let startY;
@@ -72,12 +71,21 @@
 
         const draw = (e) => {
             overlayContext.clearRect(0, 0, canvasOverlay.width, canvasOverlay.height);
-            overlayContext.fillStyle = "red"
-            
-            if(!isPainting) {
-                overlayContext.fillStyle = "black"
+            overlayContext.strokeStyle = "#a00000";
+                
+            if(isPainting) {
+                overlayContext.strokeStyle = "#FF0000";
                 drawEmptyArc(overlayContext, e.clientX - canvasOffsetX, e.clientY, lineWidth);
-                return;
+                ctx.fillStyle = "#000000"
+                fillArc(ctx, e.clientX - canvasOffsetX, e.clientY, lineWidth);
+            }
+            if(isErasing) {
+                overlayContext.strokeStyle = "#000000";
+                drawEmptyArc(overlayContext, e.clienX - canvasOffsetX, e.clientY, lineWidth);
+                clearArc(ctx, e.clientX - canvasOffsetX, e.clientY, lineWidth);
+            }
+            if (!isPainting || !isErasing) {
+                overlayContext.strokeStyle = "#a00000";
             }
             drawEmptyArc(overlayContext, e.clientX - canvasOffsetX, e.clientY, lineWidth);
             
@@ -96,7 +104,7 @@
 
         canvasOverlay.addEventListener('mousedown', (e) => {
             if (e.which == 1) {
-                isPainting = true;
+                isErasing = true;
                 startX = e.clientX;
                 startY = e.clientY;
                 clearArc(ctx, e.clientX - canvasOffsetX, e.clientY, lineWidth);
@@ -105,18 +113,8 @@
                 isPainting = true;
                 startX = e.clientX;
                 startY = e.clientY;
+                ctx.fillStyle = "#000000";
                 fillArc(ctx, e.clientX - canvasOffsetX, e.clientY, lineWidth);
-                
-                // ctx.beginPath();
-                // ctx.rect(e.clientX - lineWidth, e.clientY - lineWidth, lineWidth*2 , lineWidth*2,)
-                // ctx.fillStyle = "black";
-                // ctx.fill();
-
-                // ctx.clearRect(0, 0, canvas.width, canvas.height);
-                // ctx.beginPath();
-                // ctx.rect(0, 0, canvas.width, canvas.height);
-                // ctx.fillStyle = "black";
-                // ctx.fill();
             }
         });
 
@@ -126,6 +124,7 @@
 
         canvasOverlay.addEventListener('mouseup', e => {
             isPainting = false;
+            isErasing = false;
             // uploadCanvas(canvas);
             // ctx.stroke();
         });

@@ -23,6 +23,7 @@ p {
 }
 
 #drawing-overlay {
+    cursor: crosshair;
     opacity: 1;
     width: 100vw;
     height: calc(100vh - 42px - 4px);
