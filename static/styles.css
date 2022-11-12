@@ -34,7 +34,7 @@ p {
 }
 
 #drawing-board {
-    opacity: 0.5;
+    opacity: 0.75;
     width: 100vw;
     height: calc(100vh - 42px - 4px);
     top: calc(42px + 2px);

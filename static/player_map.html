@@ -40,14 +40,14 @@
             React.useEffect(() => {
                 const interval = setInterval(() => {
                     loadMap();
-                }, 500);
+                }, 400);
                 return () => clearInterval(interval);
             }, []);
 
             return (
                 <div>
                     <div id="map-header">
-                        <h1>Player Map - Zoom {parseFloat(mapScale).toFixed(1)}x</h1>
+                        <h1>Player Map</h1>
                     </div>
                     <div id="map-view">
                         <img id="player-canvas" src={canvasSrc}/>

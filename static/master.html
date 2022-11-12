@@ -71,35 +71,27 @@
 
         const draw = (e) => {
             overlayContext.clearRect(0, 0, canvasOverlay.width, canvasOverlay.height);
-            overlayContext.strokeStyle = "#a00000";
                 
             if(isPainting) {
-                overlayContext.strokeStyle = "#FF0000";
-                drawEmptyArc(overlayContext, e.clientX - canvasOffsetX, e.clientY, lineWidth);
                 ctx.fillStyle = "#000000"
-                fillArc(ctx, e.clientX - canvasOffsetX, e.clientY, lineWidth);
+                fillArc(ctx, e.clientX - canvasOffsetX, e.clientY - canvasOffsetY, lineWidth);
             }
             if(isErasing) {
-                overlayContext.strokeStyle = "#000000";
-                drawEmptyArc(overlayContext, e.clienX - canvasOffsetX, e.clientY, lineWidth);
-                clearArc(ctx, e.clientX - canvasOffsetX, e.clientY, lineWidth);
+                // overlayContext.strokeStyle = "#000000";
+                clearArc(ctx, e.clientX - canvasOffsetX, e.clientY - canvasOffsetY, lineWidth);
             }
-            if (!isPainting || !isErasing) {
+            if (!isPainting && !isErasing) {
                 overlayContext.strokeStyle = "#a00000";
+                drawEmptyArc(overlayContext, e.clientX - canvasOffsetX, e.clientY - canvasOffsetY, lineWidth);
             }
-            drawEmptyArc(overlayContext, e.clientX - canvasOffsetX, e.clientY, lineWidth);
-            
-
-            // ctx.lineWidth = lineWidth;
-            // ctx.lineCap = 'round';
-
-            // ctx.lineTo(e.clientX - canvasOffsetX, e.clientY);
-            // ctx.stroke();
-
-            // ctx.beginPath();
-            // ctx.arc(e.clientX - canvasOffsetX, e.clientY, lineWidth, 0, 2 * Math.PI);
-            // ctx.clip()
-            // ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (isPainting && !isErasing) {
+                overlayContext.strokeStyle = "#000000";
+                drawEmptyArc(overlayContext, e.clientX - canvasOffsetX, e.clientY - canvasOffsetY, lineWidth);
+            }
+            if (!isPainting && isErasing) {
+                overlayContext.strokeStyle = "#f00000";
+                drawEmptyArc(overlayContext, e.clientX - canvasOffsetX, e.clientY - canvasOffsetY, lineWidth);
+            }
         }
 
         canvasOverlay.addEventListener('mousedown', (e) => {
@@ -107,14 +99,18 @@
                 isErasing = true;
                 startX = e.clientX;
                 startY = e.clientY;
-                clearArc(ctx, e.clientX - canvasOffsetX, e.clientY, lineWidth);
+                clearArc(ctx, e.clientX - canvasOffsetX, e.clientY - canvasOffsetY, lineWidth);
+                overlayContext.strokeStyle = "#f00000";
+                drawEmptyArc(overlayContext, e.clientX - canvasOffsetX, e.clientY - canvasOffsetY, lineWidth);
             }
             if (e.which == 3) {
                 isPainting = true;
                 startX = e.clientX;
                 startY = e.clientY;
                 ctx.fillStyle = "#000000";
-                fillArc(ctx, e.clientX - canvasOffsetX, e.clientY, lineWidth);
+                fillArc(ctx, e.clientX - canvasOffsetX, e.clientY - canvasOffsetY, lineWidth);
+                overlayContext.strokeStyle = "#000000";
+                drawEmptyArc(overlayContext, e.clientX - canvasOffsetX, e.clientY - canvasOffsetY, lineWidth);
             }
         });
 
@@ -125,6 +121,8 @@
         canvasOverlay.addEventListener('mouseup', e => {
             isPainting = false;
             isErasing = false;
+            overlayContext.strokeStyle = "#a00000";
+            drawEmptyArc(overlayContext, e.clientX - canvasOffsetX, e.clientY - canvasOffsetY, lineWidth);
             // uploadCanvas(canvas);
             // ctx.stroke();
         });
@@ -191,7 +189,8 @@
                     scaleFactor: 1.0,
                     xOffset: 0,
                     yOffset: 0,
-                    canvas: document.getElementById('drawing-board')
+                    canvas: document.getElementById('drawing-board'),
+                    isLoaded: false
                 }
                 this.loadMap = this.loadMap.bind(this);
                 this.loadMap();
@@ -315,7 +314,7 @@
                 document.addEventListener("keydown", this._handleKeyDown);
                 const interval = setInterval(() => {
                     uploadData(this.state);
-                }, 500);
+                }, 400);
                 return () => clearInterval(interval);
             }
 
@@ -332,8 +331,8 @@
                     this.setState({
                         imageSrc: jsonResponse.mapImage,
                         scaleFactor: jsonResponse.scaleFactor,
-                        xOffset: 0,
-                        yOffset: 0
+                        xOffset: jsonResponse.xOffset,
+                        yOffset: jsonResponse.yOffset
                     });
                 }.bind(this);
                 req.send(null);
@@ -371,6 +370,18 @@
                 })
             }
 
+            handleShrinkCursor(e) {
+                lineWidth = lineWidth - 16;
+            }
+
+            handleEnlargeCursor(e) {
+                lineWidth = lineWidth + 16;
+            }
+            
+            getLineWidth() {
+                return lineWidth;
+            }
+
             render() {
                 return (
                     <div>
@@ -379,6 +390,9 @@
                             <input type="text" id="mapurl" name="mapurl" onChange={(e) => this.handleURLChange(e)}/> or 
                             <label htmlFor="myfile"> choose a map file: </label>
                             <input type="file" id="mapfile" name="mapfile" accept="image/*" onChange={(e) => this.handleImageFile(e)}></input><br/>
+                            -<button onClick={e => this.handleShrinkCursor(e)}>Smaller</button>
+                            O
+                            <button onClick={e => this.handleEnlargeCursor(e)}>Bigger</button>+
                         </div>
                         <div id="map-view" onKeyPress={this.handleAnswerChange}>
                             <img 
