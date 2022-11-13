@@ -369,13 +369,21 @@
                     canvas: this.clearCanvas()
                 })
             }
+            
+            drawCurrentCursor() {
+                overlayContext.clearRect(0, 0, canvasOverlay.width, canvasOverlay.height);
+                overlayContext.strokeStyle = "#FFFFFF";
+                drawEmptyArc(overlayContext, (canvasOverlay.width / 2), 0, lineWidth);
+            }
 
             handleShrinkCursor(e) {
-                lineWidth = lineWidth - 16;
+                lineWidth = lineWidth - (lineWidth / 4);
+                this.drawCurrentCursor();
             }
 
             handleEnlargeCursor(e) {
-                lineWidth = lineWidth + 16;
+                lineWidth = lineWidth + (lineWidth / 4);
+                this.drawCurrentCursor();
             }
             
             getLineWidth() {

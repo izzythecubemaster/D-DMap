@@ -25,6 +25,7 @@ p {
 #drawing-overlay {
     cursor: crosshair;
     opacity: 1;
+    filter: blur(0px);
     width: 100vw;
     height: calc(100vh - 42px - 4px);
     top: calc(42px + 2px);
@@ -35,6 +36,8 @@ p {
 
 #drawing-board {
     opacity: 0.75;
+    filter: blur(2px);
+    box-shadow: 0px 0px 0px 6px rgb(64 0 0);
     width: 100vw;
     height: calc(100vh - 42px - 4px);
     top: calc(42px + 2px);
@@ -44,6 +47,9 @@ p {
 }
 
 #player-canvas {
+    opacity: 0.99;
+    filter: blur(2px);
+    box-shadow: 0px 0px 0px 6px rgb(64 0 0);
     z-index: 2;
     position: fixed;
     top: calc(42px + 2px);
